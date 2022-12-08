@@ -1,83 +1,41 @@
-import { useState, useReducer } from 'react'
+import { useState, useReducer, useMemo, useCallback } from 'react'
 import reactLogo from './assets/react.svg'
 import './App.css'
 
-const UserForm = () => {
-  const [state, dispatch] = useReducer(
-    (state, action) => {
-      /* For forms we can combine whatever comes in on our existing state with useReducer, no switch needed*/
-      return {
-        ...state,
-        ...action,
-      }
-    },
-    {
-      first: '',
-      last: '',
-    }
-  )
-  return (
-    <div>
-      <input
-        type="text"
-        value={state.first}
-        onChange={(e) => dispatch({ first: e.target.value })}
-      />
-      <input
-        type="text"
-        value={state.last}
-        onChange={(e) => dispatch({ last: e.target.value })}
-      />
-      {state.first} {state.last}
-    </div>
-  )
-}
-function NameList() {
-  const [state, dispatch] = useReducer(
-    (state, action) => {
-      switch (action.type) {
-        case 'SET_NAME':
-          return { ...state, name: action.payload }
-        case 'ADD_NAME':
-          return { ...state, names: [...state.names, state.name], name: '' }
-      }
-    },
-    {
-      names: [],
-      name: '',
-    }
-  )
-  return (
-    <div className="App">
-      <input
-        type="text"
-        value={state.name}
-        onChange={(e) =>
-          dispatch({ type: 'SET_NAME', payload: e.target.value })
-        }
-      />
-      <button
-        onClick={() =>
-          dispatch({ type: 'ADD_NAME', payload: [...state.names, state.name] })
-        }
-      >
-        add name
-      </button>
-      <ul>
-        {state.names.map((name, i) => {
-          return <li key={i}>{name}</li>
-        })}
-      </ul>
-    </div>
-  )
-}
+const SortedList = ({ list, sortFunction }) => {
+  console.log('sort list render')
 
+  const sortedList = useMemo(() => {
+    console.log('running sort')
+    return [...list].sort(sortFunction)
+  }, [list, sortFunction])
+  return <div>{sortedList.join(', ')}</div>
+}
 const App = () => {
+  const [numbers] = useState([10, 20, 30])
+
+  const total = useMemo(() => numbers.reduce((acc, n) => acc + n, 0), [numbers])
+
+  const [names] = useState(['John', 'Paul', 'George', 'Ringo'])
+
+  const [count1, setCount1] = useState(0)
+  const [count2, setCount2] = useState(0)
+
+  const countTotal = count1 + count2
+
+  const sortFunc = useCallback((a, b) => a.localeCompare(b), [])
+
   return (
-    <div className="App">
-      <NameList />
-      <UserForm />
-    </div>
+    <>
+      <div className="App">Total: {total}</div>
+      <div className="App">Names: {names.join(', ')}</div>
+
+      <div className="App">Sorted Names:</div>
+      <SortedList list={names} sortFunction={sortFunc} />
+      <div className="App">Count total: {countTotal}</div>
+      <button onClick={() => setCount1(count1 + 1)}>count 1 - {count1}</button>
+      <button onClick={() => setCount2(count2 + 1)}>count 2 - {count2}</button>
+    </>
   )
 }
 export default App
